@@ -583,7 +583,7 @@ class MessageRepositoryImpl @Inject constructor(
         return message
     }
 
-    override fun insertReceivedSms(subId: Int, address: String, body: String, sentTime: Long): Message {
+    override fun insertReceivedSms(subId: Int, address: String, body: String, sentTime: Long, isNewContact: Boolean): Message {
 
         // Insert the message to Realm
         val message = Message().apply {
@@ -592,6 +592,7 @@ class MessageRepositoryImpl @Inject constructor(
             this.dateSent = sentTime
             this.date = System.currentTimeMillis()
             this.subId = subId
+            this.isNewContact = isNewContact
 
             id = messageIds.newId()
             threadId = TelephonyCompat.getOrCreateThreadId(context, address)
@@ -607,7 +608,8 @@ class MessageRepositoryImpl @Inject constructor(
         val values = contentValuesOf(
                 Sms.ADDRESS to address,
                 Sms.BODY to body,
-                Sms.DATE_SENT to sentTime
+                Sms.DATE_SENT to sentTime,
+                "is_new_contact" to isNewContact
         )
 
         if (prefs.canUseSubId.get()) {

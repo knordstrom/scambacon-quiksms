@@ -18,6 +18,7 @@
  */
 package dev.octoshrimpy.quik.model
 
+import android.telephony.PhoneNumberUtils
 import io.realm.RealmObject
 import io.realm.annotations.PrimaryKey
 
@@ -27,4 +28,17 @@ open class PhoneNumber(
     var address: String = "",
     var type: String = "",
     var isDefault: Boolean = false
-) : RealmObject()
+) : RealmObject() {
+
+    fun hasSameAddress(other: PhoneNumber?): Boolean {
+        return other?.let { o -> PhoneNumberUtils.compare(address, o.address)} == true
+
+//        other?.let { n ->
+//            val a = n.address.replace("-","")
+//            val baseAddress = address.replace("-","")
+//            baseAddress.endsWith(a)
+//        } == true
+    }
+}
+
+

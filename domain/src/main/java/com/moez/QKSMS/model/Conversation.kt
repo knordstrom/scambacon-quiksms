@@ -43,6 +43,12 @@ open class Conversation(
     val unread: Boolean get() = lastMessage?.read == false
     val me: Boolean get() = lastMessage?.isMe() == true
 
+    fun isUnknown(): Boolean {
+        val isPrivateConversation = recipients.size == 1
+        val isUnknown = recipients.get(0)?.isUnknown() == true
+        return isPrivateConversation && isUnknown
+    }
+
     fun getTitle(): String {
         return name.takeIf { it.isNotBlank() } ?: recipients.joinToString { recipient -> recipient.getDisplayName() }
     }

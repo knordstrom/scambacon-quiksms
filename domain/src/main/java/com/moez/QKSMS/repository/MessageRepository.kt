@@ -86,7 +86,7 @@ interface MessageRepository {
 
     fun insertSentSms(subId: Int, threadId: Long, address: String, body: String, date: Long): Message
 
-    fun insertReceivedSms(subId: Int, address: String, body: String, sentTime: Long): Message
+    fun insertReceivedSms(subId: Int, address: String, body: String, sentTime: Long, isNewContact: Boolean): Message
 
     /**
      * Marks the message as sending, in case we need to retry sending it

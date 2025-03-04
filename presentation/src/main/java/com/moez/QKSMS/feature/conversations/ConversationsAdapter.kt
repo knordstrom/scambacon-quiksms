@@ -21,6 +21,7 @@ package dev.octoshrimpy.quik.feature.conversations
 import android.content.Context
 import android.graphics.Typeface
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.core.text.bold
 import androidx.core.text.buildSpannedString
@@ -35,10 +36,12 @@ import dev.octoshrimpy.quik.common.util.Colors
 import dev.octoshrimpy.quik.common.util.DateFormatter
 import dev.octoshrimpy.quik.common.util.extensions.resolveThemeColor
 import dev.octoshrimpy.quik.common.util.extensions.setTint
+import dev.octoshrimpy.quik.common.util.extensions.setVisible
 import dev.octoshrimpy.quik.model.Conversation
 import dev.octoshrimpy.quik.util.PhoneNumberUtils
 import kotlinx.android.synthetic.main.conversation_list_item.*
 import kotlinx.android.synthetic.main.conversation_list_item.view.*
+import kotlinx.android.synthetic.main.qkreply_activity.view2
 import javax.inject.Inject
 
 class ConversationsAdapter @Inject constructor(
@@ -48,6 +51,8 @@ class ConversationsAdapter @Inject constructor(
     private val navigator: Navigator,
     private val phoneNumberUtils: PhoneNumberUtils
 ) : QkRealmAdapter<Conversation>() {
+
+    var showUnknown = false
 
     init {
         // This is how we access the threadId for the swipe actions
@@ -92,6 +97,8 @@ class ConversationsAdapter @Inject constructor(
 
     override fun onBindViewHolder(holder: QkViewHolder, position: Int) {
         val conversation = getItem(position) ?: return
+        val isUnknown = conversation.isUnknown()
+        holder.containerView.setVisible(showUnknown || !isUnknown)
 
         // If the last message wasn't incoming, then the colour doesn't really matter anyway
         val lastMessage = conversation.lastMessage

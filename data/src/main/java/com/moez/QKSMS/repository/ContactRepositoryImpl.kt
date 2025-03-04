@@ -29,6 +29,7 @@ import dev.octoshrimpy.quik.extensions.asObservable
 import dev.octoshrimpy.quik.extensions.mapNotNull
 import dev.octoshrimpy.quik.model.Contact
 import dev.octoshrimpy.quik.model.ContactGroup
+import dev.octoshrimpy.quik.model.PhoneNumber
 import dev.octoshrimpy.quik.util.Preferences
 import io.reactivex.Flowable
 import io.reactivex.Observable
@@ -45,6 +46,22 @@ class ContactRepositoryImpl @Inject constructor(
     private val context: Context,
     private val prefs: Preferences
 ) : ContactRepository {
+
+    override fun isNewContact(address: String): Boolean {
+        val contacts = this.getContacts()
+        val contact = this.getUnmanagedContact(address)
+
+        val phoneNumber = PhoneNumber(address = address)
+
+        val numbers = contacts.flatMap { c -> c.numbers }
+        val existing = contacts.filter { c ->
+            c.numbers.filter {n ->
+                phoneNumber.hasSameAddress(n)
+            }.isNotEmpty()
+        }
+        //return true if contact exists, false otherwise
+        return existing.isNotEmpty()
+    }
 
     override fun findContactUri(address: String): Single<Uri> {
         return Flowable.just(address)

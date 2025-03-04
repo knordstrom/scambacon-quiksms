@@ -22,14 +22,18 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.provider.Telephony.Sms
+import android.telephony.SmsMessage
+import com.moez.QKSMS.model.SmsMessageWrapper
 import dev.octoshrimpy.quik.interactor.ReceiveSms
 import dagger.android.AndroidInjection
+import dev.octoshrimpy.quik.repository.ContactRepository
 import timber.log.Timber
 import javax.inject.Inject
 
 class SmsReceiver : BroadcastReceiver() {
 
     @Inject lateinit var receiveMessage: ReceiveSms
+    @Inject lateinit var contacts: ContactRepository
 
     override fun onReceive(context: Context, intent: Intent) {
         AndroidInjection.inject(this, context)
@@ -37,9 +41,15 @@ class SmsReceiver : BroadcastReceiver() {
 
         Sms.Intents.getMessagesFromIntent(intent)?.let { messages ->
             val subId = intent.extras?.getInt("subscription", -1) ?: -1
+            val messagesWithContacts = messages.map { message: SmsMessage ->
+                val address = message.originatingAddress
+                val isContact = address?.let{ a -> contacts.isNewContact(a)} == true
+                SmsMessageWrapper(message, isContact)
+            }
 
             val pendingResult = goAsync()
-            receiveMessage.execute(ReceiveSms.Params(subId, messages)) { pendingResult.finish() }
+            val params = ReceiveSms.Params(subId, messagesWithContacts)
+            receiveMessage.execute(params) { pendingResult.finish() }
         }
     }
 

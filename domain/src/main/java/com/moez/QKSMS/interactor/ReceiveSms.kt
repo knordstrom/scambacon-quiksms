@@ -19,6 +19,7 @@
 package dev.octoshrimpy.quik.interactor
 
 import android.telephony.SmsMessage
+import com.moez.QKSMS.model.SmsMessageWrapper
 import dev.octoshrimpy.quik.blocking.BlockingClient
 import dev.octoshrimpy.quik.extensions.mapNotNull
 import dev.octoshrimpy.quik.manager.NotificationManager
@@ -40,7 +41,7 @@ class ReceiveSms @Inject constructor(
     private val shortcutManager: ShortcutManager
 ) : Interactor<ReceiveSms.Params>() {
 
-    class Params(val subId: Int, val messages: Array<SmsMessage>)
+    class Params(val subId: Int, val messages: List<SmsMessageWrapper>)
 
     override fun buildObservable(params: Params): Flowable<*> {
         return Flowable.just(params)
@@ -48,7 +49,7 @@ class ReceiveSms @Inject constructor(
                 .mapNotNull {
                     // Don't continue if the sender is blocked
                     val messages = it.messages
-                    val address = messages[0].displayOriginatingAddress
+                    val address = messages[0].message.displayOriginatingAddress
                     val action = blockingClient.shouldBlock(address).blockingGet()
                     val shouldDrop = prefs.drop.get()
                     Timber.v("block=$action, drop=$shouldDrop")
@@ -58,13 +59,14 @@ class ReceiveSms @Inject constructor(
                         return@mapNotNull null
                     }
 
-                    val time = messages[0].timestampMillis
+                    val isNewContact = messages[0].isNewContact
+                    val time = messages[0].message.timestampMillis
                     val body: String = messages
-                            .mapNotNull { message -> message.displayMessageBody }
+                            .mapNotNull { message -> message.message.displayMessageBody }
                             .reduce { body, new -> body + new }
 
                     // Add the message to the db
-                    val message = messageRepo.insertReceivedSms(it.subId, address, body, time)
+                    val message = messageRepo.insertReceivedSms(it.subId, address, body, time, isNewContact)
 
                     when (action) {
                         is BlockingClient.Action.Block -> {

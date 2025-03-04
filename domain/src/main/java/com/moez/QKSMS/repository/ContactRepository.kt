@@ -27,6 +27,8 @@ import io.realm.RealmResults
 
 interface ContactRepository {
 
+    fun isNewContact(address: String): Boolean
+
     fun findContactUri(address: String): Single<Uri>
 
     fun getContacts(): RealmResults<Contact>

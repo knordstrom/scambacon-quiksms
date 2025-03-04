@@ -50,8 +50,9 @@
                 android:id="@+id/toolbarSearch"
                 style="@style/ToolbarText"
                 android:layout_marginTop="8dp"
-                android:layout_marginEnd="8dp"
+                android:layout_marginEnd="40dp"
                 android:layout_marginBottom="8dp"
+                android:layout_width="280dp"
                 android:minHeight="40dp"
                 android:background="@drawable/rounded_rectangle_24dp"
                 android:backgroundTint="?attr/bubbleColor"
@@ -59,10 +60,19 @@
                 android:inputType="text"
                 android:maxLines="1"
                 android:paddingStart="16dp"
-                android:paddingEnd="16dp"
+                android:paddingRight="16dp"
                 android:textColorHint="?android:attr/textColorTertiary"
                 app:textSize="primary"
                 tools:textSize="16sp" />
+
+            <CheckBox
+                android:id="@+id/checkbox_show_unknown"
+                android:layout_width="80dp"
+                android:layout_height="40dp"
+                android:text="@string/show_unknown"
+                android:textSize="11sp"
+                android:textAlignment="textStart">
+            </CheckBox>
 
         </androidx.appcompat.widget.Toolbar>
 
@@ -108,6 +118,7 @@
             app:tint="@color/white" />
 
         <View
+            android:id="@+id/view3"
             android:layout_width="0dp"
             android:layout_height="8dp"
             android:background="@drawable/ab_shadow"

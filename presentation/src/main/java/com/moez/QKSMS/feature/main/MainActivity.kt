@@ -30,6 +30,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewStub
+import android.widget.CheckBox
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.core.app.ActivityCompat
 import androidx.core.view.GravityCompat
@@ -126,6 +127,7 @@ class MainActivity : QkThemedActivity(), MainView {
     private val snackbar by lazy { findViewById<View>(R.id.snackbar) }
     private val syncing by lazy { findViewById<View>(R.id.syncing) }
     private val backPressedSubject: Subject<NavItem> = PublishSubject.create()
+    private val toggleShowUnknown by lazy { findViewById<CheckBox>(R.id.checkbox_show_unknown)}
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
@@ -143,6 +145,13 @@ class MainActivity : QkThemedActivity(), MainView {
         (syncing as? ViewStub)?.setOnInflateListener { _, _ ->
             syncingProgress?.progressTintList = ColorStateList.valueOf(theme.blockingFirst().theme)
             syncingProgress?.indeterminateTintList = ColorStateList.valueOf(theme.blockingFirst().theme)
+        }
+
+        toggleShowUnknown.setOnCheckedChangeListener { buttonView, isChecked ->
+            conversationsAdapter.showUnknown = isChecked
+            conversationsAdapter.updateData(
+                data = conversationsAdapter.data
+            )
         }
 
         toggle.syncState()

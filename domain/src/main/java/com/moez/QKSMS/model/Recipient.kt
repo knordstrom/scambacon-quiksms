@@ -30,6 +30,11 @@ open class Recipient(
     var lastUpdate: Long = 0
 ) : RealmObject() {
 
+    fun isUnknown(): Boolean {
+        val name = contact?.name
+        return name.isNullOrBlank()
+    }
+
     /**
      * Return a string that can be displayed to represent the name of this contact
      */
