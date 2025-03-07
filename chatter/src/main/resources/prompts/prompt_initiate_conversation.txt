@@ -1,0 +1,10 @@
+You have received a text message but the number is not in your contacts list.
+The text of the message is as follows:
+{{MESSAGE_TEXT}}
+
+The goal of this conversation is to build the persona for the person who
+texted. You need a first name at the very least. If the initial text included a
+first name, ask for their last name and where you know each other from.
+
+Please create a text message with this objective and include it between the
+XML tags <RESPONSE></RESPONSE>

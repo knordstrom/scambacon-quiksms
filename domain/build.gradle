@@ -17,10 +17,11 @@
  * along with QKSMS.  If not, see <http://www.gnu.org/licenses/>.
  */
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-kapt'
 apply plugin: 'realm-android' // Realm needs to be before Kotlin or the build will fail
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
-apply plugin: 'kotlin-kapt'
+
 
 android {
     compileSdk 33

@@ -1,0 +1,16 @@
+The following text conversation has occurred:
+    {{CONVERSATION}}
+
+Please classify this as to whether the people involved know one another. Participants
+likely know one another if the conversation includes information including:
+
+- the texter's first name
+- the texter's last name
+- information about how they know one another, such as a company worked for, hobbies,
+or a shared location
+
+Possible responses include:
+    UNKNOWN, KNOWN
+If it is unclear if the participants know one another, respond with UNKNOWN.
+
+Include your response between the XML tags <RESPONSE></RESPONSE>
