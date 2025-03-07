@@ -2,18 +2,22 @@
 
 How many texts do you get asking if you're lonely? Need money? Want to make new friends? These are
 all spam, and some can be quite dangerous, particularly as spoofing tech gets more sophisticated. 
-A woman in 2024 donated a great deal of money to a scammer posing as Brad Pitt and Jon Oliver did a
-deep dive on the subject of ![Pig Butchering Scams](https://www.youtube.com/watch?v=pLPpl2ISKTg).
+A woman in 2024 donated a great deal of money to a 
+[scammer posing as Brad Pitt](https://www.youtube.com/watch?v=ryOKnKCj3as) and in 2024 Jon Oliver did a
+deep dive on the subject of [Pig Butchering Scams](https://www.youtube.com/watch?v=pLPpl2ISKTg).
 
 Spam Bacon is intended to solve this by coming "pre butchered." Messages from people you don't know
 will be politely fielded in the background for more information. If they're a real person, and 
 someone you know, they will be presented to you after a quick set of verifications. However, if they
-are a scammer, the Spam Bacon "chatter" agent will invent a new (lonely) Persona and enthusiastically
+are a scammer, the Spam Bacon "chatter" agent will invent a new (very lonely) Persona and enthusiastically
 engage the scammer in as long a conversation as they are willing to endure.
 
 The results of these conversations will be shared with the community, for research and classification
 purposes but also for potential entertainment value. For example, we envision a large central 
-database of such conversations ready for a "best conversation" contest at the end of each year.
+database of such conversations ready for a "best conversation" contest at the end of each year. And 
+from a social standpoint, we hope that the scammers will be so overwhelmed by the volume of conversation
+that the economic model becomes unviable - many of the people who are doing this are being coerced 
+to do so, and we hope to make their lives a little easier by making their slavery less profitable.
 
 The wrapper application around the Spam Bacon agent is based on a fork of QUIK, which is a fork of 
 QKSMS. 
