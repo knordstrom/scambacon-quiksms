@@ -24,10 +24,10 @@ class GroqModelChat @Inject constructor(
     private val groqSDK: GroqSDK
 ): ModelChat {
 
-    final val INITIATE_PROMPT = "initiate_conversation"
-    final val COMPLETE_PROMPT = "continue_conversation"
-    final val EVALUATE_PROMPT = "validate_contact"
-    final val PERSONA_PROMPT = "create_persona"
+    val INITIATE_PROMPT = "initiate_conversation"
+    val COMPLETE_PROMPT = "continue_conversation"
+    val EVALUATE_PROMPT = "validate_contact"
+    val PERSONA_PROMPT = "create_persona"
 
     private fun parseResponse(response: String?): String? {
         if (response == null) {
@@ -47,7 +47,6 @@ class GroqModelChat @Inject constructor(
         }
         val result = messages.joinToString("\n")
         return result
-//        return messages.joinToString { "\n" }
     }
 
     override fun initiateConversation(conversation: Conversation): String? {

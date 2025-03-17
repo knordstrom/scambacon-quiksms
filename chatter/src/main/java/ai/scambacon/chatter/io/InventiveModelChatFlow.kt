@@ -7,22 +7,16 @@ import ai.scambacon.chatter.model.ApprovalStatus
 import ai.scambacon.chatter.agents.ConversationalAgent
 import android.app.Application
 import com.moez.QKSMS.model.AutoResponse
-import dev.octoshrimpy.quik.migration.ChatterRealmMigration
 import dev.octoshrimpy.quik.model.Conversation
 import dev.octoshrimpy.quik.repository.ConversationRepository
 import dev.octoshrimpy.quik.repository.ScheduledMessageRepository
-import io.realm.Realm
-import io.realm.RealmConfiguration
 import javax.inject.Inject
 
 class InventiveModelChatFlow @Inject constructor(
     val modelChat: ModelChat,
     val decisionManager: DecisionManager,
     val personaManager: PersonaManager,
-    val conversationRepository: ConversationRepository,
-    val scheduledMessageRepository: ScheduledMessageRepository,
-//    ,
-//    val realmMigration: ChatterRealmMigration
+    val conversationRepository: ConversationRepository
 ): Application(), ModelChatFlow, ConversationalAgent {
 
     val INITATE_ATTEMPTS = 10
@@ -38,7 +32,6 @@ class InventiveModelChatFlow @Inject constructor(
         if (evaluationDecision.threadCount < INITATE_ATTEMPTS) {
             val response = modelChat.initiateConversation(conversation)
             val newDecision = decisionManager.incrementDecisionMessagedCount(evaluationDecision, response!!)
-//            sendMessage(conversation, evaluationDecision)
             return newDecision
         }
         else {
@@ -55,7 +48,7 @@ class InventiveModelChatFlow @Inject constructor(
         }
 
         val response = modelChat.continueBullshitConversation(conversation)
-//        sendMessage(conversation, evaluationDecision)
+
         //TODO analyze last message in conversation to add to decision persona
         return decisionManager.incrementDecisionMessagedCount(lastDecision, response!!)
     }
@@ -71,17 +64,6 @@ class InventiveModelChatFlow @Inject constructor(
 
     }
 
-    fun sendMessage(conversation: Conversation, decision: Decision) {
-        scheduledMessageRepository.saveScheduledMessage(
-            System.currentTimeMillis() + MESSAGE_DELAY,
-            -1,
-            conversation.recipients.map{it.address}.toList(),
-            false,
-            decision.lastMessage ?: "",
-            emptyList()
-        )
-    }
-
     override fun converse(threadId: Long): AutoResponse {
         val conversation = conversationRepository.getConversation(threadId)
 
@@ -95,10 +77,6 @@ class InventiveModelChatFlow @Inject constructor(
         }
         val decision = converse(conversation)
         val otherPerson = personaManager.getPersonaForConversation(conversation)
-
-//        if (decision.lastMessage != null) {
-//            sendMessage(conversation, decision)
-//        }
 
         return AutoResponse(
             contactName = otherPerson?.name,

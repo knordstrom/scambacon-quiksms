@@ -1,8 +1,6 @@
 package ai.scambacon.chatter.io
 
-import java.io.File
 import java.lang.Exception
-import java.net.URL
 import javax.inject.Inject
 
 class FilePromptManager @Inject constructor(): PromptManager {

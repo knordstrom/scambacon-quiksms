@@ -1,5 +1,4 @@
 package ai.scambacon.chatter.groq
-import ai.scambacon.chatter.BuildConfig
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.contentnegotiation.*
@@ -7,19 +6,16 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.lang.Exception
 import ai.scambacon.chatter.groq.models.*
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
-import java.io.File
 import java.util.Properties
 
 import kotlinx.serialization.encodeToString
-//import kotlinx.serialization.json.Json
 
-class GroqSDKImpl constructor(
+class GroqSDKImpl(
     val apiKey: String? = null,
     val model: String? = null
 ): GroqSDK {

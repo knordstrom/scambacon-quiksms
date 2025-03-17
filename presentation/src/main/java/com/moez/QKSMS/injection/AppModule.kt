@@ -34,7 +34,6 @@ import android.content.SharedPreferences
 import android.preference.PreferenceManager
 import androidx.lifecycle.ViewModelProvider
 import com.f2prateek.rx.preferences2.RxSharedPreferences
-import ai.scambacon.chatter.agents.AgentBuilderModule
 import ai.scambacon.chatter.io.InventiveModelChatFlow
 import dev.octoshrimpy.quik.blocking.BlockingClient
 import dev.octoshrimpy.quik.blocking.BlockingManager

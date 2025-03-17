@@ -3,9 +3,7 @@ package ai.scambacon.chatter.data
 import ai.scambacon.chatter.io.ModelChat
 import ai.scambacon.chatter.model.Decision
 import dev.octoshrimpy.quik.model.Conversation
-import dev.octoshrimpy.quik.model.Message
 import io.realm.Realm
-import java.sql.Timestamp
 import javax.inject.Inject
 
 class RealmDecisionManager @Inject constructor(
