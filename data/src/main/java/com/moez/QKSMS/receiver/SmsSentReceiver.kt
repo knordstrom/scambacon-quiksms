@@ -29,8 +29,8 @@ import javax.inject.Inject
 
 class SmsSentReceiver : BroadcastReceiver() {
 
-    @Inject lateinit var markSent: MarkSent
-    @Inject lateinit var markFailed: MarkFailed
+    @Inject lateinit var markSent: dev.octoshrimpy.quik.interactor.MarkSent
+    @Inject lateinit var markFailed: dev.octoshrimpy.quik.interactor.MarkFailed
 
     override fun onReceive(context: Context, intent: Intent) {
         AndroidInjection.inject(this, context)
@@ -45,7 +45,7 @@ class SmsSentReceiver : BroadcastReceiver() {
 
             else -> {
                 val pendingResult = goAsync()
-                markFailed.execute(MarkFailed.Params(id, resultCode)) { pendingResult.finish() }
+                markFailed.execute(dev.octoshrimpy.quik.interactor.MarkFailed.Params(id, resultCode)) { pendingResult.finish() }
             }
         }
     }

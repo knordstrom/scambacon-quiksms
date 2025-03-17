@@ -9,6 +9,7 @@ import dev.octoshrimpy.quik.model.Message
 import dev.octoshrimpy.quik.repository.MessageRepository
 import ai.scambacon.chatter.groq.GroqSDK
 import ai.scambacon.chatter.model.MaritalStatus
+import io.realm.Realm
 import org.json.JSONObject
 import java.sql.Timestamp
 
@@ -32,9 +33,9 @@ class GroqModelChat @Inject constructor(
         if (response == null) {
             return null
         }
-        val regex = Regex("<RESPONSE>(.*?)</RESPONSE>")
+        val regex = Regex("<RESPONSE>(.*?)</RESPONSE>", RegexOption.DOT_MATCHES_ALL)
         val matchResult = regex.find(response)
-        val extractedText = matchResult?.groups?.get(1)?.value
+        val extractedText = matchResult?.groups?.get(1)?.value?.trim()
 
         return extractedText
     }
@@ -44,7 +45,9 @@ class GroqModelChat @Inject constructor(
         ).map { message: Message? ->
             if (message != null) "${message.address}: ${message.body}" else ""
         }
-        return messages.joinToString { "\n" }
+        val result = messages.joinToString("\n")
+        return result
+//        return messages.joinToString { "\n" }
     }
 
     override fun initiateConversation(conversation: Conversation): String? {
@@ -55,9 +58,18 @@ class GroqModelChat @Inject constructor(
         return parseResponse(response)
     }
 
+    fun getOrCreatePersona(conversation: Conversation): Persona {
+        var persona = personaManager.getPersonaForConversation(conversation)
+        if (persona == null) {
+            persona = generatePersona(conversation)
+            personaManager.writePersona(persona)
+        }
+        return persona
+    }
+
     override fun continueBullshitConversation(conversation: Conversation): String? {
         val conversationText = this.getScript(conversation)
-        val persona = personaManager.getPersonaForConversation(conversation)
+        val persona = getOrCreatePersona(conversation)
 
         val context = mapOf(
             "PERSONA" to persona.forProfile(),
@@ -80,10 +92,10 @@ class GroqModelChat @Inject constructor(
 
         val newDecision = Decision(
             conversationId = conversation.id,
-            contact = lastDecision.contact,
-            status = ApprovalStatus.fromString(decisionValue),
+            contactPersonaId = lastDecision.contactPersonaId,
+            status = (decisionValue?.let { ApprovalStatus.fromString(it) } ?: ApprovalStatus.UNKNOWN).name,
             threadCount = lastDecision.threadCount,
-            lastUpdated = Timestamp(System.currentTimeMillis())
+            lastUpdated = System.currentTimeMillis()
         )
         return newDecision
     }
@@ -102,10 +114,9 @@ class GroqModelChat @Inject constructor(
             conversationId = conversation.id,
             name = obj?.getString("name"),
             occupation = obj?.getString("occupation"),
-            married = MaritalStatus.fromString(obj?.getString("married") ?: ""),
+            married = MaritalStatus.fromString(obj?.getString("married") ?: "").name,
             backstory = obj?.getString("backstory"),
-            timestamp = Timestamp(System.currentTimeMillis()),
-            updates = emptyList() //?.getJSONArray("updates")?.toList().map { it.toString() } ?: listOf()
+            timestamp = System.currentTimeMillis()
         )
     }
 }

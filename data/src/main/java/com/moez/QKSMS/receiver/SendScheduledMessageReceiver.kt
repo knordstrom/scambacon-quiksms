@@ -29,7 +29,7 @@ import javax.inject.Inject
 class SendScheduledMessageReceiver : BroadcastReceiver() {
 
     @Inject lateinit var messageRepo: MessageRepository
-    @Inject lateinit var sendScheduledMessage: SendScheduledMessage
+    @Inject lateinit var sendScheduledMessage: dev.octoshrimpy.quik.interactor.SendScheduledMessage
 
     override fun onReceive(context: Context, intent: Intent) {
         AndroidInjection.inject(this, context)

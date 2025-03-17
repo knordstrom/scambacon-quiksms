@@ -18,6 +18,7 @@
  */
 package dev.octoshrimpy.quik.common
 
+import ai.scambacon.chatter.model.ChatterRealmModules
 import android.app.Activity
 import android.app.Application
 import android.app.Service
@@ -86,11 +87,15 @@ class QKApplication : Application(), HasActivityInjector, HasBroadcastReceiverIn
         appComponent.inject(this)
 
         Realm.init(this)
-        Realm.setDefaultConfiguration(RealmConfiguration.Builder()
-                .compactOnLaunch()
-                .migration(realmMigration)
-                .schemaVersion(QkRealmMigration.SchemaVersion)
-                .build())
+        val config = RealmConfiguration.Builder()
+            .compactOnLaunch()
+            .migration(realmMigration)
+            .schemaVersion(QkRealmMigration.SchemaVersion)
+            .addModule(ChatterRealmModules())
+            .build()
+
+//        Realm.deleteRealm(config)
+        Realm.setDefaultConfiguration(config)
 
         qkMigration.performMigration()
 

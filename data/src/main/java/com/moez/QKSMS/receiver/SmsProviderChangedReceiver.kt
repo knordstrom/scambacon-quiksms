@@ -38,7 +38,7 @@ import javax.inject.Inject
  */
 class SmsProviderChangedReceiver : BroadcastReceiver() {
 
-    @Inject lateinit var syncMessage: SyncMessage
+    @Inject lateinit var syncMessage: dev.octoshrimpy.quik.interactor.SyncMessage
 
     override fun onReceive(context: Context, intent: Intent) {
         AndroidInjection.inject(this, context)

@@ -33,9 +33,9 @@ import javax.inject.Inject
 class RemoteMessagingReceiver : BroadcastReceiver() {
 
     @Inject lateinit var conversationRepo: ConversationRepository
-    @Inject lateinit var markRead: MarkRead
+    @Inject lateinit var markRead: dev.octoshrimpy.quik.interactor.MarkRead
     @Inject lateinit var messageRepo: MessageRepository
-    @Inject lateinit var sendMessage: SendMessage
+    @Inject lateinit var sendMessage: dev.octoshrimpy.quik.interactor.SendMessage
     @Inject lateinit var subscriptionManager: SubscriptionManagerCompat
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -55,6 +55,6 @@ class RemoteMessagingReceiver : BroadcastReceiver() {
         val addresses = conversationRepo.getConversation(threadId)?.recipients?.map { it.address } ?: return
 
         val pendingRepository = goAsync()
-        sendMessage.execute(SendMessage.Params(subId, threadId, addresses, body)) { pendingRepository.finish() }
+        sendMessage.execute(dev.octoshrimpy.quik.interactor.SendMessage.Params(subId, threadId, addresses, body)) { pendingRepository.finish() }
     }
 }

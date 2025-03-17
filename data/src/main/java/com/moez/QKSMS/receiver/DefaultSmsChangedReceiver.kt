@@ -32,7 +32,7 @@ import javax.inject.Inject
 class DefaultSmsChangedReceiver : BroadcastReceiver() {
 
     @Inject lateinit var prefs: Preferences
-    @Inject lateinit var syncMessages: SyncMessages
+    @Inject lateinit var syncMessages: dev.octoshrimpy.quik.interactor.SyncMessages
 
     @RequiresApi(Build.VERSION_CODES.N)
     override fun onReceive(context: Context, intent: Intent) {

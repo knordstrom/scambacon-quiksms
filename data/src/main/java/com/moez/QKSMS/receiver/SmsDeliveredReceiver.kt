@@ -29,8 +29,8 @@ import javax.inject.Inject
 
 class SmsDeliveredReceiver : BroadcastReceiver() {
 
-    @Inject lateinit var markDelivered: MarkDelivered
-    @Inject lateinit var markDeliveryFailed: MarkDeliveryFailed
+    @Inject lateinit var markDelivered: dev.octoshrimpy.quik.interactor.MarkDelivered
+    @Inject lateinit var markDeliveryFailed: dev.octoshrimpy.quik.interactor.MarkDeliveryFailed
 
     override fun onReceive(context: Context, intent: Intent) {
         AndroidInjection.inject(this, context)
@@ -47,7 +47,7 @@ class SmsDeliveredReceiver : BroadcastReceiver() {
             // TODO notify about delivery failure
             Activity.RESULT_CANCELED -> {
                 val pendingResult = goAsync()
-                markDeliveryFailed.execute(MarkDeliveryFailed.Params(id, resultCode)) { pendingResult.finish() }
+                markDeliveryFailed.execute(dev.octoshrimpy.quik.interactor.MarkDeliveryFailed.Params(id, resultCode)) { pendingResult.finish() }
             }
         }
     }

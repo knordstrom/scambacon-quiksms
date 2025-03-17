@@ -32,7 +32,7 @@ class BlockThreadReceiver : BroadcastReceiver() {
 
     @Inject lateinit var blockingClient: BlockingClient
     @Inject lateinit var conversationRepo: ConversationRepository
-    @Inject lateinit var markBlocked: MarkBlocked
+    @Inject lateinit var markBlocked: dev.octoshrimpy.quik.interactor.MarkBlocked
     @Inject lateinit var prefs: Preferences
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -45,7 +45,7 @@ class BlockThreadReceiver : BroadcastReceiver() {
 
         blockingClient
                 .block(conversation.recipients.map { it.address })
-                .andThen(markBlocked.buildObservable(MarkBlocked.Params(listOf(threadId), blockingManager, null)))
+                .andThen(markBlocked.buildObservable(dev.octoshrimpy.quik.interactor.MarkBlocked.Params(listOf(threadId), blockingManager, null)))
                 .subscribe { pendingResult.finish() }
     }
 

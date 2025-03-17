@@ -32,6 +32,7 @@ interface BlockingClient {
     sealed class Action {
         class Block(val reason: String? = null) : Action()
         object Unblock : Action()
+        object Investigate : Action()
 
         // We only need these for Should I Answer, because they don't allow us to block numbers in their app directly.
         // This means there's a good chance that if a number is blocked in QK, it won't be blocked there, so we
@@ -42,6 +43,7 @@ interface BlockingClient {
             return when (this) {
                 is Block -> "Block"
                 is Unblock -> "Unblock"
+                is Investigate -> "Investigate"
                 is DoNothing -> "DoNothing"
             }
         }

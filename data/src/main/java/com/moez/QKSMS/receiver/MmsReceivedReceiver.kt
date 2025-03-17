@@ -28,7 +28,7 @@ import javax.inject.Inject
 
 class MmsReceivedReceiver : MmsReceivedReceiver() {
 
-    @Inject lateinit var receiveMms: ReceiveMms
+    @Inject lateinit var receiveMms: dev.octoshrimpy.quik.interactor.ReceiveMms
 
     override fun onReceive(context: Context?, intent: Intent?) {
         AndroidInjection.inject(this, context)

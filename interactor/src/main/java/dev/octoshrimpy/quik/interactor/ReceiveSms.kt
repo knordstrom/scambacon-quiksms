@@ -18,12 +18,14 @@
  */
 package dev.octoshrimpy.quik.interactor
 
-import android.telephony.SmsMessage
+import ai.scambacon.chatter.agents.ConversationalAgent
+import com.moez.QKSMS.model.AutoResponse
 import com.moez.QKSMS.model.SmsMessageWrapper
 import dev.octoshrimpy.quik.blocking.BlockingClient
 import dev.octoshrimpy.quik.extensions.mapNotNull
 import dev.octoshrimpy.quik.manager.NotificationManager
 import dev.octoshrimpy.quik.manager.ShortcutManager
+import dev.octoshrimpy.quik.model.Message
 import dev.octoshrimpy.quik.repository.ConversationRepository
 import dev.octoshrimpy.quik.repository.MessageRepository
 import dev.octoshrimpy.quik.util.Preferences
@@ -38,10 +40,30 @@ class ReceiveSms @Inject constructor(
     private val messageRepo: MessageRepository,
     private val notificationManager: NotificationManager,
     private val updateBadge: UpdateBadge,
-    private val shortcutManager: ShortcutManager
+    private val shortcutManager: ShortcutManager,
+    private val chatAgent: ConversationalAgent,
+    private val messageSender: SendMessage
+
 ) : Interactor<ReceiveSms.Params>() {
 
     class Params(val subId: Int, val messages: List<SmsMessageWrapper>)
+
+    fun investigate(message: Message): AutoResponse {
+        val autoReponse = chatAgent.converse(message.threadId)
+        if (autoReponse.markKnown) {
+            message.isNewContact = true
+            Timber.v("Marking message as known", message)
+        } else if (autoReponse.message != null) {
+            messageSender.execute(SendMessage.Params(
+                    subId = message.subId,
+                    threadId = message.threadId,
+                    addresses = listOf(message.address),
+                    body = autoReponse.message!!,
+                    delay = autoReponse.delay
+            ))
+        }
+        return autoReponse
+    }
 
     override fun buildObservable(params: Params): Flowable<*> {
         return Flowable.just(params)
@@ -50,7 +72,7 @@ class ReceiveSms @Inject constructor(
                     // Don't continue if the sender is blocked
                     val messages = it.messages
                     val address = messages[0].message.displayOriginatingAddress
-                    val action = blockingClient.shouldBlock(address).blockingGet()
+                    var action: BlockingClient.Action = blockingClient.shouldBlock(address).blockingGet()
                     val shouldDrop = prefs.drop.get()
                     Timber.v("block=$action, drop=$shouldDrop")
 
@@ -60,6 +82,9 @@ class ReceiveSms @Inject constructor(
                     }
 
                     val isNewContact = messages[0].isNewContact
+                    if (isNewContact) { //TODO: this sucks, redo interface
+                        action = BlockingClient.Action.Investigate
+                    }
                     val time = messages[0].message.timestampMillis
                     val body: String = messages
                             .mapNotNull { message -> message.message.displayMessageBody }
@@ -74,6 +99,7 @@ class ReceiveSms @Inject constructor(
                             conversationRepo.markBlocked(listOf(message.threadId), prefs.blockingManager.get(), action.reason)
                         }
                         is BlockingClient.Action.Unblock -> conversationRepo.markUnblocked(message.threadId)
+                        is BlockingClient.Action.Investigate -> investigate(message)
                         else -> Unit
                     }
 

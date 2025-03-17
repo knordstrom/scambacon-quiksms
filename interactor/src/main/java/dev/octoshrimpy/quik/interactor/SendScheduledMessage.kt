@@ -49,7 +49,13 @@ class SendScheduledMessage @Inject constructor(
             .map { message ->
                 val threadId = TelephonyCompat.getOrCreateThreadId(context, message.recipients)
                 val attachments = message.attachments.mapNotNull(Uri::parse).map { Attachment(context, it) }
-                SendMessage.Params(message.subId, threadId, message.recipients, message.body, attachments)
+                SendMessage.Params(
+                    message.subId,
+                    threadId,
+                    message.recipients,
+                    message.body,
+                    attachments
+                )
             }
             .flatMap(sendMessage::buildObservable)
             .doOnNext { deleteScheduledMessagesInteractor.execute(listOf(params)) }

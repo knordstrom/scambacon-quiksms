@@ -30,6 +30,9 @@ import io.realm.RealmMigration
 import io.realm.RealmObjectSchema
 import io.realm.Sort
 import javax.inject.Inject
+import kotlin.reflect.KCallable
+import kotlin.reflect.KClass
+import kotlin.reflect.KProperty
 
 
 class QkRealmMigration @Inject constructor(
@@ -38,7 +41,7 @@ class QkRealmMigration @Inject constructor(
 ) : RealmMigration {
 
     companion object {
-        const val SchemaVersion: Long = 12L
+        const val SchemaVersion: Long = 15L
     }
 
     private val migrate0 = { realm: DynamicRealm ->
@@ -212,16 +215,112 @@ class QkRealmMigration @Inject constructor(
     private val migrate11 = { realm: DynamicRealm ->
         val message = realm.schema.get("Message")
         message?.addField("isNewContact", Boolean::class.java)
-        message?.transform(RealmObjectSchema.Function { obj -> obj.setBoolean("IsNewContact", false) })
+        message?.transform(RealmObjectSchema.Function { obj -> obj.setBoolean("isNewContact", false) })
         Unit
     }
 
-    var migrations = listOf(migrate0, migrate1, migrate2, migrate3, migrate4,
-        migrate5, migrate6, migrate7, migrate8, migrate9, migrate10, migrate11)
+    private val migrate12 = { realm: DynamicRealm ->
+        realm.schema.contains("Persona").let {
+            realm.schema.remove("Persona")
+        }
+        if (!realm.schema.contains("Persona")) {
+            realm.schema.create("Persona")
+                .addField(
+                    "id",
+                    Long::class.java,
+                    FieldAttribute.PRIMARY_KEY,
+                    FieldAttribute.REQUIRED
+                )
+                .addField("conversationId", Long::class.java, FieldAttribute.REQUIRED)
+                .addField("name", String::class.java)
+                .addField("occupation", String::class.java)
+                .addField("married", String::class.java)
+                .addField("backstory", String::class.java)
+                .addField("timestamp", Long::class.java, FieldAttribute.REQUIRED)
+                .addRealmListField("updates", String::class.java)
+        }
+        Unit
+    }
 
-    private fun doMigration(version: Int, targetVersion: Int, realm: DynamicRealm): Int {
-        if (version == targetVersion) {
-            val exec: (DynamicRealm) -> Unit = migrations.get(version)
+    private val migrate13 = { realm: DynamicRealm ->
+        realm.schema.contains("Decision").let {
+            realm.schema.remove("Decision")
+        }
+        if (!realm.schema.contains("Decision")) {
+            realm.schema.create("Decision")
+                .addField(
+                    "conversationId",
+                    Long::class.java,
+                    FieldAttribute.PRIMARY_KEY,
+                    FieldAttribute.REQUIRED
+                )
+                .addField("contactPersonaId", Long::class.java)
+                .addField("status", String::class.java)
+                .addField("threadCount", Int::class.java, FieldAttribute.REQUIRED)
+                .addField("lastMessage", String::class.java)
+                .addField("lastUpdated", Long::class.java)
+
+        }
+        Unit
+    }
+
+    private val migrate14 = { realm: DynamicRealm ->
+        realm.schema.contains("Decision").let {
+            realm.schema.remove("Decision")
+        }
+        realm.schema.contains("Persona").let {
+            realm.schema.remove("Persona")
+        }
+        if (!realm.schema.contains("Persona")) {
+            realm.schema.create("Persona")
+                .addField(
+                    "id",
+                    Long::class.java,
+                    FieldAttribute.PRIMARY_KEY,
+                    FieldAttribute.REQUIRED
+                )
+                .addField("conversationId", Long::class.java, FieldAttribute.INDEXED).setNullable("conversationId", true)
+                .addField("name", String::class.java)
+                .addField("occupation", String::class.java)
+                .addField("married", String::class.java)
+                .addField("backstory", String::class.java)
+                .addField("timestamp", Long::class.java, FieldAttribute.REQUIRED)
+                .addRealmListField("updates", String::class.java)
+        }
+        if (!realm.schema.contains("Decision")) {
+            realm.schema.create("Decision")
+                .addField(
+                    "conversationId",
+                    Long::class.java,
+                    FieldAttribute.PRIMARY_KEY,
+                    FieldAttribute.REQUIRED
+                )
+                .addField("contactPersonaId", Long::class.java)
+                    .setNullable("contactPersonaId", true)
+                .addField("status", String::class.java, FieldAttribute.REQUIRED)
+                .addField("threadCount", Int::class.java, FieldAttribute.REQUIRED)
+                .addField("lastMessage", String::class.java)
+                .addField("lastUpdated", Long::class.java)
+
+            /**
+             * - Property 'Decision.contactPersonaId' has been made optional.
+             * - Property 'Decision.status' has been made required.
+             * - Property 'Persona.conversationId' has been made optional.
+             * - Property 'Persona.conversationId' has been made indexed.
+             */
+        }
+        Unit
+    }
+
+    var migrations = listOf(migrate0,
+        migrate1, migrate2, migrate3, migrate4,
+        migrate5, migrate6, migrate7, migrate8,
+        migrate9, migrate10, migrate11, migrate12,
+        migrate13, migrate14)
+
+    private fun doMigration(version: Int, realm: DynamicRealm): Int {
+        if (version > 0) {
+            val exec: (DynamicRealm) -> Unit = migrations.get(version - 1)
             exec(realm)
             return version + 1
         }
@@ -232,213 +331,11 @@ class QkRealmMigration @Inject constructor(
     override fun migrate(realm: DynamicRealm, oldVersion: Long, newVersion: Long) {
         var version = oldVersion.toInt()
 
-        for (i in 0 .. migrations.size - 1) {
-            version = doMigration(version, i, realm)
+        for (targetVersion in oldVersion .. newVersion) {
+            version = doMigration(version, realm)
         }
 
         check(version >= newVersion) { "Migration missing from v$oldVersion to v$newVersion" }
     }
 
 }
-
-
-
-//        version = doMigration(version, 0, realm)
-//        version = doMigration(version, 1, realm)
-//        version = doMigration(version, 2, realm)
-//        if (version == 0L) {
-//            realm.schema.get("MmsPart")
-//                    ?.removeField("image")
-//
-//            version++
-//        }
-
-//        if (version == 1L) {
-//            realm.schema.get("Message")
-//                    ?.addField("subId", Int::class.java)
-//
-//            version++
-//        }
-//
-//        if (version == 2L) {
-//            realm.schema.get("Conversation")
-//                    ?.addField("name", String::class.java, FieldAttribute.REQUIRED)
-//
-//            version++
-//        }
-
-//        if (version == 3L) {
-//            realm.schema.create("ScheduledMessage")
-//                    .addField("id", Long::class.java, FieldAttribute.PRIMARY_KEY, FieldAttribute.REQUIRED)
-//                    .addField("date", Long::class.java, FieldAttribute.REQUIRED)
-//                    .addField("subId", Long::class.java, FieldAttribute.REQUIRED)
-//                    .addRealmListField("recipients", String::class.java)
-//                    .addField("sendAsGroup", Boolean::class.java, FieldAttribute.REQUIRED)
-//                    .addField("body", String::class.java, FieldAttribute.REQUIRED)
-//                    .addRealmListField("attachments", String::class.java)
-//
-//            version++
-//        }
-
-//        if (version == 4L) {
-//            realm.schema.get("Conversation")
-//                    ?.addField("pinned", Boolean::class.java, FieldAttribute.REQUIRED, FieldAttribute.INDEXED)
-//
-//            version++
-//        }
-
-//        if (version == 5L) {
-//            realm.schema.create("BlockedNumber")
-//                    .addField("id", Long::class.java, FieldAttribute.PRIMARY_KEY, FieldAttribute.REQUIRED)
-//                    .addField("address", String::class.java, FieldAttribute.REQUIRED)
-//
-//            version++
-//        }
-//
-//        if (version == 6L) {
-//            realm.schema.get("Conversation")
-//                    ?.addField("blockingClient", Integer::class.java)
-//                    ?.addField("blockReason", String::class.java)
-//
-//            realm.schema.get("MmsPart")
-//                    ?.addField("seq", Integer::class.java, FieldAttribute.REQUIRED)
-//                    ?.addField("name", String::class.java)
-//
-//            version++
-//        }
-//
-//if (version == 7L) {
-//            realm.schema.get("Conversation")
-//                    ?.addRealmObjectField("lastMessage", realm.schema.get("Message"))
-//                    ?.removeField("count")
-//                    ?.removeField("date")
-//                    ?.removeField("snippet")
-//                    ?.removeField("read")
-//                    ?.removeField("me")
-//
-//            val conversations = realm.where("Conversation")
-//                    .findAll()
-//
-//            val messages = realm.where("Message")
-//                    .sort("date", Sort.DESCENDING)
-//                    .distinct("threadId")
-//                    .findAll()
-//                    .associateBy { message -> message.getLong("threadId") }
-//
-//            conversations.forEach { conversation ->
-//                conversation.setObject("lastMessage", messages[conversation.getLong("id")])
-//            }
-//
-//            version++
-//        }
-
-    //        if (version == 8L) {
-//            // Delete this data since we'll need to repopulate it with its new primaryKey
-//            realm.delete("PhoneNumber")
-//
-//            realm.schema.create("ContactGroup")
-//                    .addField("id", Long::class.java, FieldAttribute.PRIMARY_KEY, FieldAttribute.REQUIRED)
-//                    .addField("title", String::class.java, FieldAttribute.REQUIRED)
-//                    .addRealmListField("contacts", realm.schema.get("Contact"))
-//
-//            realm.schema.get("PhoneNumber")
-//                    ?.addField("id", Long::class.java, FieldAttribute.PRIMARY_KEY, FieldAttribute.REQUIRED)
-//                    ?.addField("accountType", String::class.java)
-//                    ?.addField("isDefault", Boolean::class.java, FieldAttribute.REQUIRED)
-//
-//            val phoneNumbers = cursorToContact.getContactsCursor()
-//                    ?.map(cursorToContact::map)
-//                    ?.distinctBy { contact -> contact.numbers.firstOrNull()?.id } // Each row has only one number
-//                    ?.groupBy { contact -> contact.lookupKey }
-//                    ?: mapOf()
-//
-//            realm.schema.get("Contact")
-//                    ?.addField("starred", Boolean::class.java, FieldAttribute.REQUIRED)
-//                    ?.addField("photoUri", String::class.java)
-//                    ?.transform { realmContact ->
-//                        val numbers = RealmList<DynamicRealmObject>()
-//                        phoneNumbers[realmContact.get("lookupKey")]
-//                                ?.flatMap { contact -> contact.numbers }
-//                                ?.map { number ->
-//                                    realm.createObject("PhoneNumber", number.id).apply {
-//                                        setString("accountType", number.accountType)
-//                                        setString("address", number.address)
-//                                        setString("type", number.type)
-//                                    }
-//                                }
-//                                ?.let(numbers::addAll)
-//
-//                        val photoUri = phoneNumbers[realmContact.get("lookupKey")]
-//                                ?.firstOrNull { number -> number.photoUri != null }
-//                                ?.photoUri
-//
-//                        realmContact.setList("numbers", numbers)
-//                        realmContact.setString("photoUri", photoUri)
-//                    }
-//
-//            // Migrate conversation themes
-//            val recipients = mutableMapOf<Long, Int>() // Map of recipientId:theme
-//            realm.where("Conversation").findAll().forEach { conversation ->
-//                val pref = prefs.theme(conversation.getLong("id"))
-//                if (pref.isSet) {
-//                    conversation.getList("recipients").forEach { recipient ->
-//                        recipients[recipient.getLong("id")] = pref.get()
-//                    }
-//
-//                    pref.delete()
-//                }
-//            }
-//
-//            recipients.forEach { (recipientId, theme) ->
-//                prefs.theme(recipientId).set(theme)
-//            }
-//
-//            version++
-//        }
-//    if (version == 9L) {
-//        val migrateNotificationAction = { pref: Int ->
-//            when (pref) {
-//                1 -> Preferences.NOTIFICATION_ACTION_READ
-//                2 -> Preferences.NOTIFICATION_ACTION_REPLY
-//                3 -> Preferences.NOTIFICATION_ACTION_CALL
-//                4 -> Preferences.NOTIFICATION_ACTION_DELETE
-//                else -> pref
-//            }
-//        }
-//
-//        val migrateSwipeAction = { pref: Int ->
-//            when (pref) {
-//                2 -> Preferences.SWIPE_ACTION_DELETE
-//                3 -> Preferences.SWIPE_ACTION_CALL
-//                4 -> Preferences.SWIPE_ACTION_READ
-//                5 -> Preferences.SWIPE_ACTION_UNREAD
-//                else -> pref
-//            }
-//        }
-//
-//        if (prefs.notifAction1.isSet) prefs.notifAction1.set(migrateNotificationAction(prefs.notifAction1.get()))
-//        if (prefs.notifAction2.isSet) prefs.notifAction2.set(migrateNotificationAction(prefs.notifAction2.get()))
-//        if (prefs.notifAction3.isSet) prefs.notifAction3.set(migrateNotificationAction(prefs.notifAction3.get()))
-//        if (prefs.swipeLeft.isSet) prefs.swipeLeft.set(migrateSwipeAction(prefs.swipeLeft.get()))
-//        if (prefs.swipeRight.isSet) prefs.swipeRight.set(migrateSwipeAction(prefs.swipeRight.get()))
-//
-//        version++
-//    }
-//    if (version == 10L) {
-//        realm.schema.get("MmsPart")
-//            ?.addField("messageId", Long::class.java, FieldAttribute.INDEXED, FieldAttribute.REQUIRED)
-//            ?.transform { part ->
-//                val messageId = part.linkingObjects("Message", "parts").firstOrNull()?.getLong("contentId") ?: 0
-//                part.setLong("messageId", messageId)
-//            }
-//
-//        version++
-//    }
-//
-//    if (version == 11L) {
-//        val message = realm.schema.get("Message")
-//        message?.addField("IsNewContact", Boolean::class.java)
-//        message?.transform(RealmObjectSchema.Function { obj -> obj.setBoolean("IsNewContact", false) })
-//
-//        version++
-//    }

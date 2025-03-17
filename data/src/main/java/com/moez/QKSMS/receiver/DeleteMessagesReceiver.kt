@@ -27,7 +27,7 @@ import javax.inject.Inject
 
 class DeleteMessagesReceiver : BroadcastReceiver() {
 
-    @Inject lateinit var deleteMessages: DeleteMessages
+    @Inject lateinit var deleteMessages: dev.octoshrimpy.quik.interactor.DeleteMessages
 
     override fun onReceive(context: Context, intent: Intent) {
         AndroidInjection.inject(this, context)
@@ -35,7 +35,7 @@ class DeleteMessagesReceiver : BroadcastReceiver() {
         val pendingResult = goAsync()
         val threadId = intent.getLongExtra("threadId", 0)
         val messageIds = intent.getLongArrayExtra("messageIds") ?: longArrayOf()
-        deleteMessages.execute(DeleteMessages.Params(messageIds.toList(), threadId)) { pendingResult.finish() }
+        deleteMessages.execute(dev.octoshrimpy.quik.interactor.DeleteMessages.Params(messageIds.toList(), threadId)) { pendingResult.finish() }
     }
 
 }

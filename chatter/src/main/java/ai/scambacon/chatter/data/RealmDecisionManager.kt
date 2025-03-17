@@ -14,7 +14,7 @@ class RealmDecisionManager @Inject constructor(
 
     override fun evaluateConversation(conversation: Conversation, lastDecision: Decision): Decision {
         val decision = modelChat.evaluate(conversation, lastDecision)
-        return Decision(lastDecision.conversationId, lastDecision.contact,
+        return Decision(lastDecision.conversationId, lastDecision.contactPersonaId,
             decision.status, lastDecision.threadCount, lastDecision.lastUpdated)
     }
 
@@ -37,11 +37,38 @@ class RealmDecisionManager @Inject constructor(
     }
 
     override fun updateDecision(decision: Decision): Unit {
-        decision.lastUpdated = Timestamp(System.currentTimeMillis())
-        Realm.getDefaultInstance().insertOrUpdate(decision)
+        Realm.getDefaultInstance().use { realm ->
+            realm.refresh()
+            realm.executeTransaction {
+                decision.lastUpdated = System.currentTimeMillis()
+                realm.insertOrUpdate(decision)
+            }
+        }
     }
 
+    override fun incrementDecisionMessagedCount(
+        decision: Decision,
+        lastMessage: String
+    ): Decision {
+        Realm.getDefaultInstance().use { realm ->
+            realm.refresh()
+            realm.executeTransaction {
+                decision.threadCount++
+                decision.lastMessage = lastMessage
+                decision.lastUpdated = System.currentTimeMillis()
+                realm.insertOrUpdate(decision)
+            }
+        }
+        return decision
+    }
+
+
     override fun createDecision(decision: Decision): Unit {
-        Realm.getDefaultInstance().insert(decision)
+        Realm.getDefaultInstance().use { realm ->
+            realm.refresh()
+            realm.executeTransaction {
+                realm.insert(decision)
+            }
+        }
     }
 }

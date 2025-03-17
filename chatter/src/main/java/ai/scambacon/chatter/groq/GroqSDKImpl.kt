@@ -16,10 +16,10 @@ import io.ktor.client.statement.HttpResponse
 import java.io.File
 import java.util.Properties
 
+import kotlinx.serialization.encodeToString
+//import kotlinx.serialization.json.Json
 
-import javax.inject.Inject
-
-class GroqSDKImpl @Inject constructor(
+class GroqSDKImpl constructor(
     val apiKey: String? = null,
     val model: String? = null
 ): GroqSDK {
@@ -42,28 +42,29 @@ class GroqSDKImpl @Inject constructor(
     val APIKey: String = apiKey?: properties.getProperty("GROQ_API_KEY")
     val groqModel: String = model?: properties.getProperty("GROQ_MODEL")
 
-    val client = HttpClient(CIO) {
-        install(ContentNegotiation) {
-            json(Json { ignoreUnknownKeys = true })
-        }
-    }
-
     override fun getResponse(text: String): String? {
-
+        val client = HttpClient(CIO) {
+            install(ContentNegotiation) {
+                json(Json { ignoreUnknownKeys = true })
+            }
+        }
         val requestData = ChatCompletionRequest(
             model = groqModel,
             messages = listOf(ChatMessage("user", text))
         )
 
+        val jsonString = Json.encodeToString(requestData)
+
         var returnVal: String? = null
         runBlocking {
             try {
+
                 val response: HttpResponse = client.post("https://api.groq.com/openai/v1/chat/completions") {
                     headers {
                         append(HttpHeaders.Authorization, "Bearer $APIKey")
                         append(HttpHeaders.ContentType, ContentType.Application.Json)
                     }
-                    setBody(requestData)
+                    setBody(jsonString)
                 }
                 val chatCompletionResponse: ChatCompletionResponse = response.body()
                 returnVal = chatCompletionResponse.choices.firstOrNull()?.message?.content

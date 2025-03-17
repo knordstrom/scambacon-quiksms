@@ -217,6 +217,8 @@ dependencies {
     implementation project(":common")
     implementation project(':data')
     implementation project(':domain')
+    implementation project(':interactor')
+    implementation project(':chatter')
 
     withAnalyticsImplementation 'com.google.firebase:firebase-crashlytics:17.3.0'
     withAnalyticsImplementation "com.android.billingclient:billing:$billing_version"

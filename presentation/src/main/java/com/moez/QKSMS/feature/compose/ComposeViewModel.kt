@@ -1043,7 +1043,8 @@ class ComposeViewModel @Inject constructor(
 
                         // Sending a group message
                         sendAsGroup -> {
-                            sendMessage.execute(SendMessage
+                            sendMessage.execute(
+                                SendMessage
                                     .Params(subId, conversation.id, addresses, body, state.attachments, delay))
                         }
 
@@ -1055,7 +1056,8 @@ class ComposeViewModel @Inject constructor(
 
                         // Create a new conversation with one address
                         addresses.size == 1 -> {
-                            sendMessage.execute(SendMessage
+                            sendMessage.execute(
+                                SendMessage
                                     .Params(subId, threadId, addresses, body, state.attachments, delay))
                         }
 
@@ -1067,7 +1069,8 @@ class ComposeViewModel @Inject constructor(
                                 } ?: 0
                                 val address = listOf(conversationRepo
                                         .getConversation(threadId)?.recipients?.firstOrNull()?.address ?: addr)
-                                sendMessage.execute(SendMessage
+                                sendMessage.execute(
+                                    SendMessage
                                         .Params(subId, threadId, address, body, state.attachments, delay))
                             }
                         }

@@ -27,7 +27,7 @@ import javax.inject.Inject
 
 class BootReceiver : BroadcastReceiver() {
 
-    @Inject lateinit var updateScheduledMessageAlarms: UpdateScheduledMessageAlarms
+    @Inject lateinit var updateScheduledMessageAlarms: dev.octoshrimpy.quik.interactor.UpdateScheduledMessageAlarms
 
     override fun onReceive(context: Context, intent: Intent?) {
         AndroidInjection.inject(this, context)

@@ -30,7 +30,7 @@ import javax.inject.Inject
 class HeadlessSmsSendService : IntentService("HeadlessSmsSendService") {
 
     @Inject lateinit var conversationRepo: ConversationRepository
-    @Inject lateinit var sendMessage: SendMessage
+    @Inject lateinit var sendMessage: dev.octoshrimpy.quik.interactor.SendMessage
 
     override fun onHandleIntent(intent: Intent?) {
         if (intent?.action != TelephonyManager.ACTION_RESPOND_VIA_MESSAGE) return
@@ -40,7 +40,7 @@ class HeadlessSmsSendService : IntentService("HeadlessSmsSendService") {
             val intentUri = intent.data
             val recipients = intentUri?.let(::getRecipients)?.split(";") ?: return@let
             val threadId = conversationRepo.getOrCreateConversation(recipients)?.id ?: 0L
-            sendMessage.execute(SendMessage.Params(-1, threadId, recipients, body))
+            sendMessage.execute(dev.octoshrimpy.quik.interactor.SendMessage.Params(-1, threadId, recipients, body))
         }
     }
 

@@ -1,20 +1,14 @@
 package ai.scambacon.chatter.data
 
-import dagger.Module
 import ai.scambacon.chatter.model.Persona
-import dagger.Provides
 import dev.octoshrimpy.quik.model.Conversation
 
-@Module
 interface PersonaManager {
 
-    @Provides
-    fun getPersonaForConversation(conversation: Conversation): Persona
+    fun getPersonaForConversation(conversation: Conversation): Persona?
 
-    @Provides
-    fun writePersona(persona: Persona): Boolean
+    fun writePersona(persona: Persona): Unit
 
-    @Provides
-    fun updatePersona(persona: Persona): Boolean
+    fun updatePersona(persona: Persona): Unit
 
 }

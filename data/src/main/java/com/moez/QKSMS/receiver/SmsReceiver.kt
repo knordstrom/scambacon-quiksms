@@ -32,7 +32,7 @@ import javax.inject.Inject
 
 class SmsReceiver : BroadcastReceiver() {
 
-    @Inject lateinit var receiveMessage: ReceiveSms
+    @Inject lateinit var receiveMessage: dev.octoshrimpy.quik.interactor.ReceiveSms
     @Inject lateinit var contacts: ContactRepository
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -48,7 +48,7 @@ class SmsReceiver : BroadcastReceiver() {
             }
 
             val pendingResult = goAsync()
-            val params = ReceiveSms.Params(subId, messagesWithContacts)
+            val params = dev.octoshrimpy.quik.interactor.ReceiveSms.Params(subId, messagesWithContacts)
             receiveMessage.execute(params) { pendingResult.finish() }
         }
     }

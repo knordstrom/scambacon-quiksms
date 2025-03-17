@@ -46,6 +46,7 @@ import dev.octoshrimpy.quik.injection.android.ServiceBuilderModule
 import dagger.Component
 import dagger.android.support.AndroidSupportInjectionModule
 import javax.inject.Singleton
+import ai.scambacon.chatter.agents.ConversationalAgent
 
 @Singleton
 @Component(modules = [
@@ -73,6 +74,7 @@ interface AppComponent {
     fun inject(dialog: QkDialog)
 
     fun inject(service: WidgetAdapter)
+    fun inject(service: ConversationalAgent)
 
     /**
      * This can't use AndroidInjection, or else it will crash on pre-marshmallow devices

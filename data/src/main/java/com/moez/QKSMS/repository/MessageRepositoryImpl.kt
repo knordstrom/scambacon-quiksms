@@ -98,7 +98,7 @@ class MessageRepositoryImpl @Inject constructor(
                     }
                 }
                 .sort("date")
-                .findAllAsync()
+                .findAll()
     }
 
     override fun getMessage(id: Long): Message? {

@@ -28,7 +28,7 @@ import javax.inject.Inject
 
 class SpeakThreadsReceiver : BroadcastReceiver() {
 
-    @Inject lateinit var speakThread: SpeakThreads
+    @Inject lateinit var speakThread: dev.octoshrimpy.quik.interactor.SpeakThreads
     @Inject lateinit var conversationRepo: ConversationRepository
 
 

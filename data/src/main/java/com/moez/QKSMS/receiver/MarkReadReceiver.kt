@@ -27,7 +27,7 @@ import javax.inject.Inject
 
 class MarkReadReceiver : BroadcastReceiver() {
 
-    @Inject lateinit var markRead: MarkRead
+    @Inject lateinit var markRead: dev.octoshrimpy.quik.interactor.MarkRead
 
     override fun onReceive(context: Context, intent: Intent) {
         AndroidInjection.inject(this, context)

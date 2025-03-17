@@ -18,6 +18,15 @@
  */
 package dev.octoshrimpy.quik.injection
 
+import ai.scambacon.chatter.agents.ConversationalAgent
+import ai.scambacon.chatter.data.DecisionManager
+import ai.scambacon.chatter.data.PersonaManager
+import ai.scambacon.chatter.data.RealmDecisionManager
+import ai.scambacon.chatter.data.RealmPersonaManager
+import ai.scambacon.chatter.groq.GroqSDKImpl
+import ai.scambacon.chatter.io.FilePromptManager
+import ai.scambacon.chatter.io.GroqModelChat
+import ai.scambacon.chatter.io.ModelChat
 import android.app.Application
 import android.content.ContentResolver
 import android.content.Context
@@ -25,6 +34,8 @@ import android.content.SharedPreferences
 import android.preference.PreferenceManager
 import androidx.lifecycle.ViewModelProvider
 import com.f2prateek.rx.preferences2.RxSharedPreferences
+import ai.scambacon.chatter.agents.AgentBuilderModule
+import ai.scambacon.chatter.io.InventiveModelChatFlow
 import dev.octoshrimpy.quik.blocking.BlockingClient
 import dev.octoshrimpy.quik.blocking.BlockingManager
 import dev.octoshrimpy.quik.common.ViewModelFactory
@@ -94,6 +105,34 @@ import javax.inject.Singleton
     ConversationInfoComponent::class,
     ThemePickerComponent::class])
 class AppModule(private var application: Application) {
+
+
+    @Provides
+    fun providePersonaManager(): PersonaManager = RealmPersonaManager()
+
+    @Provides
+    fun provideModelChat(
+        messageRepository: MessageRepository,
+    ): ModelChat = GroqModelChat(
+        promptManager = FilePromptManager(),
+        messageRepository = messageRepository,
+        personaManager = RealmPersonaManager(),
+        groqSDK = GroqSDKImpl()
+    )
+
+    @Provides
+    fun provideDecisionManager(modelChat: ModelChat): DecisionManager = RealmDecisionManager(modelChat)
+
+    @Provides
+    fun provideAgentComponent(modelChat: ModelChat,
+                                  decisionManager: DecisionManager,
+                                  personaManager: PersonaManager,
+                                  conversationRepository: ConversationRepository,
+                                  scheduledMessageRepository: ScheduledMessageRepository): ConversationalAgent {
+        return InventiveModelChatFlow(modelChat,
+            decisionManager, personaManager, conversationRepository, scheduledMessageRepository,
+        )
+    }
 
     @Provides
     @Singleton

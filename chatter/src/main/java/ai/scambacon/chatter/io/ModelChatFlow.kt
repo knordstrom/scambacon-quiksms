@@ -3,10 +3,11 @@ package ai.scambacon.chatter.io
 import dagger.Module
 import dagger.Provides
 import ai.scambacon.chatter.model.Decision
+import ai.scambacon.chatter.agents.ConversationalAgent
+import com.moez.QKSMS.model.AutoResponse
 import dev.octoshrimpy.quik.model.Conversation
 import dev.octoshrimpy.quik.model.Message
 
-@Module
 interface ModelChatFlow {
 
     /**
@@ -21,6 +22,6 @@ interface ModelChatFlow {
      *          passes through, no action
      *
      */
-    @Provides
     fun converse(conversation: Conversation): Decision
+
 }

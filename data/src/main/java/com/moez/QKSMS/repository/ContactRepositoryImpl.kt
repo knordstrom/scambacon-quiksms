@@ -60,7 +60,7 @@ class ContactRepositoryImpl @Inject constructor(
             }.isNotEmpty()
         }
         //return true if contact exists, false otherwise
-        return existing.isNotEmpty()
+        return existing.isEmpty()
     }
 
     override fun findContactUri(address: String): Single<Uri> {
